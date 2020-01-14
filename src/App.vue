@@ -14,7 +14,7 @@ export default {
     }
   },
   components:{
-    MainTabBar
+    MainTabBar,
   }
  }
 </script>
