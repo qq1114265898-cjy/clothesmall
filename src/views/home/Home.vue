@@ -1,53 +1,14 @@
 <template>
     <div id="home">
         <nav-bar class="home-nav"><div slot="center">购物车</div></nav-bar>
-        <home-swiper :banners="banners"/>
-        <recommend-views :recommends="recommends"/>
-        <feature-view/>
-        <tab-control :titles="['流行','新款','精选']" class="tab-control"/>
-        <goods-list :goods="goods['pop'].list"/>
-        <ul>
-            <li>列表1</li>
-            <li>列表2</li>
-            <li>列表3</li>
-            <li>列表4</li>
-            <li>列表5</li>
-            <li>列表6</li>
-            <li>列表7</li>
-            <li>列表8</li>
-            <li>列表9</li>
-            <li>列表10</li>
-            <li>列表11</li>
-            <li>列表12</li>
-            <li>列表13</li>
-            <li>列表14</li>
-            <li>列表15</li>
-            <li>列表16</li>
-            <li>列表17</li>
-            <li>列表18</li>
-            <li>列表19</li>
-            <li>列表20</li>
-            <li>列表11</li>
-            <li>列表12</li>
-            <li>列表13</li>
-            <li>列表14</li>
-            <li>列表15</li>
-            <li>列表16</li>
-            <li>列表17</li>
-            <li>列表18</li>
-            <li>列表19</li>
-            <li>列表20</li>
-            <li>列表11</li>
-            <li>列表12</li>
-            <li>列表13</li>
-            <li>列表14</li>
-            <li>列表15</li>
-            <li>列表16</li>
-            <li>列表17</li>
-            <li>列表18</li>
-            <li>列表19</li>
-            <li>列表20</li>
-        </ul>
+        <scroll class="home-content" ref="homescroll" :probe-type="3" @scroll="contentScroll" @pullingUp="homeUpLoad" :pull-up-load="true" >
+            <home-swiper :banners="banners"/>
+            <recommend-views :recommends="recommends"/>
+            <feature-view/>
+            <tab-control :titles="['流行','新款','精选']" class="tab-control"  @tabClick="tabClick"/>
+            <goods-list :goods="showGoods"/>
+        </scroll>   
+        <back-top v-show="showBackTop" @click.native="backClick"/>
     </div>
 </template>
  
@@ -59,6 +20,8 @@ import FeatureView from './childComps/FeatureView'
 import NavBar from 'components/common/navbar/NavBar';
 import TabControl from 'components/content/tabControl/TabControl'
 import goodsList from 'components/content/goods/goodsList'
+import Scroll from 'components/common/scroll/Scroll'
+import BackTop from 'components/content/backTop/BackTop'
 
 import {getHomeMultidata,getHomeGoods} from 'network/home';
     export default {
@@ -69,7 +32,9 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
         FeatureView,
         NavBar,
         TabControl,
-        goodsList
+        goodsList,
+        Scroll,
+        BackTop
     },
     data(){
         return{
@@ -79,7 +44,9 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
                 'pop':{page:0,list:[]},
                 'new':{page:0,list:[]},
                 'sell':{page:0,list:[]},
-            }
+            },
+            currentType:'pop',
+            currentPositionY:0,
         }
     },
     created() {
@@ -88,7 +55,41 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
         this.getHomeGoods('new')
         this.getHomeGoods('sell')
     },
+    computed: {
+        showGoods(){
+            return this.goods[this.currentType].list
+        },
+        showBackTop(){
+            return -this.currentPositionY > 1000
+        }
+    },
     methods: {
+        //监听事件相关的方法
+        tabClick(index){
+            switch(index){
+                case 0:
+                    this.currentType='pop';
+                    break
+                case 1:
+                    this.currentType='new';
+                    break
+                case 2:
+                    this.currentType='sell';
+                    break
+            }
+        },
+        backClick(){
+            this.$refs.homescroll.scroll.scrollTo(0,0,500)
+        },
+        contentScroll(position){
+            this.currentPositionY=position.y
+        },
+        homeUpLoad(){
+            console.log("上啦加载更多")
+            this.getHomeGoods(this.currentType)
+            this.$refs.homescroll.scroll.finishPullUp();
+        },
+        //请求网络相关的方法
         getHomeMultidata(){
             getHomeMultidata()
             .then(res=>{
@@ -109,9 +110,11 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
 }
 </script>
 
-<style>
+<style scoped>
 #home{
     padding-top:44px;
+    height: 100vh;
+    position: relative;
 }
 .home-nav{
     background-color:var(--color-tint);
@@ -127,5 +130,13 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
     position: sticky;
     top:44px;
 }
-
+.home-content{
+    /* height: calc(100% - 49px); */
+    overflow: hidden;
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
+}
 </style>
