@@ -108,8 +108,10 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
             this.currentPositionY=position.y
             this.isFixed=-(position.y)>this.tabOffsetTop
         },
+        //获取上拉加载更多方法
         homeUpLoad(){
             this.getHomeGoods(this.currentType)
+            //上拉方法里写再次获取商品的函数 以及获取完毕后 记得finshPullUp()
             this.$refs.homescroll.scroll.finishPullUp();
         },
         //获取offsetTop
