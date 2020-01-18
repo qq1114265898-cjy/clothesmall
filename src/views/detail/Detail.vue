@@ -1,14 +1,20 @@
 <template>
     <div id="detail">
-        <detail-nav-bar class="detail-nav-bar"></detail-nav-bar>
-        <scroll class="detail-scroll" @imageLoad="imageLoad" ref="scroll">
+        <detail-nav-bar class="detail-nav-bar" @titleClick="titleClick" ref="nav"></detail-nav-bar>
+        <ul>
+            <li v-for="item in $store.state.cartList">{{item}}</li>
+        </ul>
+        <scroll class="detail-scroll" @imageLoad="imageLoad" ref="scroll" @scroll="scroll" :probe-type="3">
             <detail-swiper :topImages="topImages"></detail-swiper>
             <detail-base-info :goods="goods"></detail-base-info>
             <detail-shop-info :shop="shopInfo"></detail-shop-info>
             <detail-goods-info :detailInfo="detailGoodsInfo"></detail-goods-info>
-            <detail-param-info :paramInfo="goodsParam"></detail-param-info>
-            <detail-comment-info :commentInfo="commentInfo"></detail-comment-info>
+            <detail-param-info ref="param" :paramInfo="goodsParam"></detail-param-info>
+            <detail-comment-info ref="comment" :commentInfo="commentInfo"></detail-comment-info>
+            <goods-list ref="recommend" :goods="recommends"></goods-list>
         </scroll>
+        <detail-bottom-bar @addToCart="addCart"/>
+        <back-top v-show="showBackTop" @click.native="backClick"/>
     </div>
 </template>
  
@@ -20,10 +26,15 @@ import DetailShopInfo from './childComps/DetailShopInfo'
 import DetailGoodsInfo from './childComps/DetailGoodsInfo'
 import DetailParamInfo from './childComps/DetailParamInfo'
 import DetailCommentInfo from './childComps/DetailCommentInfo'
+import DetailBottomBar from './childComps/DetailBottomBar'
 
+import goodsList from 'components/content/goods/goodsList'
 import Scroll from 'components/common/scroll/Scroll';
 
-import {getDetailDate, goods, shopInfo, goodsParam} from 'network/detail'
+import {debounce} from '@/common/utils';
+import {backTopMixins} from '@/common/mixin';
+
+import {getDetailDate,getRecommend, goods, shopInfo, goodsParam} from 'network/detail'
   export default {
   name:'Detail',
   data() {
@@ -34,9 +45,15 @@ import {getDetailDate, goods, shopInfo, goodsParam} from 'network/detail'
           shopInfo:{},
           detailGoodsInfo:{},
           goodsParam:{},
-          commentInfo:{}
+          commentInfo:{},
+          recommends:[],
+          Refresh:null,
+          themeOffsetY:[],
+          currentIndex:0,
+          detailRefresh:null
       }
   },
+  mixins:[backTopMixins],
   components:{
       DetailNavBar,
       DetailSwiper,
@@ -45,7 +62,9 @@ import {getDetailDate, goods, shopInfo, goodsParam} from 'network/detail'
       Scroll,
       DetailGoodsInfo,
       DetailParamInfo,
-      DetailCommentInfo
+      DetailCommentInfo,
+      goodsList,
+      DetailBottomBar,
   },
   created() { 
       //保存iid
@@ -68,20 +87,68 @@ import {getDetailDate, goods, shopInfo, goodsParam} from 'network/detail'
         if(data.rate.cRate !==0){
             this.commentInfo=data.rate.list[0]
         }
+        //获取推荐数据
+        getRecommend().then(res=>{
+            // console.log(res)
+            this.recommends=res.data.list
+        })
       })
   },
   methods: {
       imageLoad(){
-          this.$refs.scroll.scroll.refresh()
+          this.$refs.scroll.scroll.refresh();
+      },
+      titleClick(index){
+          console.log(index)
+          console.log(this.themeOffsetY)
+        
+          this.$refs.scroll.scroll.scrollTo(0, -this.themeOffsetY[index], 200);
+      },
+      //滑动定位主题
+      scroll(position){
+          const positionY=-position.y
+          //拿positionY和themeOffsetY[index]作对比
+          let length=this.themeOffsetY.length
+          for(let i=0;i<length-1;i++){
+              if((this.currentIndex!==i) && (positionY>this.themeOffsetY[i] && positionY<this.themeOffsetY[i+1])){
+                  this.currentIndex=i
+                  this.$refs.nav.currentIndex=this.currentIndex
+              }
+          }
+          //backtop mixin缺少的方法
+          this.currentPositionY=position.y
+      },
+      addCart(){
+          const product={}
+          product.image=this.topImages[0];
+          product.title=this.goods.title;
+          product.desc=this.goods.desc;
+          product.price=this.realPrice;
+          product.iid=this.iid
+          //把数据提交到vuex里
+          this.$store.commit('addCart',product)
+          console.log(this.$store.state.cartList)
       }
   },
-  beforeMount() {
-      
+  //点击导航栏跳转到对应主题
+  updated() {
+          this.themeOffsetY=[];
+          this.themeOffsetY.push(0);
+          this.themeOffsetY.push(this.$refs.param.$el.offsetTop);
+          this.themeOffsetY.push(this.$refs.comment.$el.offsetTop);
+          this.themeOffsetY.push(this.$refs.recommend.$el.offsetTop);
+          this.themeOffsetY.push(Number.MAX_VALUE)
   },
-  mounted() {
-      this.$refs.scroll.scroll.refresh()
-  },
-  }
+    mounted() {
+        this.detailRefresh=()=>{
+            this.$refs.scroll.scroll.refresh()
+        }
+        this.$bus.$on('itemImgLoad',this.detailRefresh)
+    },
+    destroyed() {
+        this.$bus.$off('itemImgLoad',this.detailRefresh)
+    },
+}
 </script>
 
 <style scoped>
@@ -97,6 +164,6 @@ import {getDetailDate, goods, shopInfo, goodsParam} from 'network/detail'
     background-color: #fff;
 }
 .detail-scroll{
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 49px);
 }
 </style>

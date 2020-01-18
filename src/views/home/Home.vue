@@ -2,7 +2,7 @@
     <div id="home">
         <nav-bar class="home-nav"><div slot="center">购物车</div></nav-bar>
         <tab-control :titles="['流行','新款','精选']" class="tab-control"  @tabClick="tabClick" ref='homeTabControl1' v-show="showTabControl"/>
-        <scroll class="home-content" ref="homescroll" :probe-type="3" @scroll="contentScroll" @pullingUp="homeUpLoad" :pull-up-load="true" >
+        <scroll class="home-content" ref="scroll" :probe-type="3" @scroll="contentScroll" @pullingUp="homeUpLoad" :pull-up-load="true" >
             <home-swiper :banners="banners" @swiperImgLoad='swiperImgLoad' ref='homeSwiper'/>
             <recommend-views :recommends="recommends"/>
             <feature-view/>
@@ -22,7 +22,8 @@ import NavBar from 'components/common/navbar/NavBar';
 import TabControl from 'components/content/tabControl/TabControl'
 import goodsList from 'components/content/goods/goodsList'
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/content/backTop/BackTop'
+
+import {backTopMixins} from '@/common/mixin';
 
 import {getHomeMultidata,getHomeGoods} from 'network/home';
     export default {
@@ -35,8 +36,8 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
         TabControl,
         goodsList,
         Scroll,
-        BackTop
     },
+    mixins:[backTopMixins],
     data(){
         return{
             banners:[],
@@ -47,10 +48,10 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
                 'sell':{page:0,list:[]},
             },
             currentType:'pop',
-            currentPositionY:0,
             tabOffsetTop:0,
             isFixed:false,
-            saveY:0
+            saveY:0,
+            homeRefresh:null
         }
     },
     created() {
@@ -60,25 +61,24 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
         this.getHomeGoods('sell')
     },
     mounted() {
-        this.$bus.$on('itemImgLoad',()=>{
-            this.$refs.homescroll.scroll.refresh()
-        })
+        this.homeRefresh=()=>{
+            this.$refs.scroll.scroll.refresh()
+        }
+        this.$bus.$on('itemImgLoad',this.homeRefresh)
     },
     activated() {
-        this.$refs.homescroll.scroll.scrollTo(0,this.saveY,0)
-        this.$refs.homescroll.scroll.refresh()
+        this.$refs.scroll.scroll.scrollTo(0,this.saveY,0)
+        this.$refs.scroll.scroll.refresh()
         this.$refs.homeSwiper.startTimer()
     },
     deactivated() {
-        this.saveY= this.$refs.homescroll.scroll.y
+        this.saveY= this.$refs.scroll.scroll.y
         this.$refs.homeSwiper.stopTimer()
+        this.$bus.$off('itemImgLoad',this.homeRefresh)
     },
-    computed: {
+    computed: {  
         showGoods(){
             return this.goods[this.currentType].list
-        },
-        showBackTop(){
-            return -this.currentPositionY > 1000
         },
         showTabControl(){
             return -this.currentPositionY>this.tabOffsetTop
@@ -101,9 +101,6 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
             this.$refs.homeTabControl1.currentIndex=index
             this.$refs.homeTabControl.currentIndex=index
         },
-        backClick(){
-            this.$refs.homescroll.scroll.scrollTo(0,0,500)
-        },
         contentScroll(position){
             this.currentPositionY=position.y
             this.isFixed=-(position.y)>this.tabOffsetTop
@@ -112,7 +109,7 @@ import {getHomeMultidata,getHomeGoods} from 'network/home';
         homeUpLoad(){
             this.getHomeGoods(this.currentType)
             //上拉方法里写再次获取商品的函数 以及获取完毕后 记得finshPullUp()
-            this.$refs.homescroll.scroll.finishPullUp();
+            this.$refs.scroll.scroll.finishPullUp();
         },
         //获取offsetTop
         swiperImgLoad(){
