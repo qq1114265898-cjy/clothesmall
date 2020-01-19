@@ -1,9 +1,6 @@
 <template>
     <div id="detail">
         <detail-nav-bar class="detail-nav-bar" @titleClick="titleClick" ref="nav"></detail-nav-bar>
-        <ul>
-            <li v-for="item in $store.state.cartList">{{item}}</li>
-        </ul>
         <scroll class="detail-scroll" @imageLoad="imageLoad" ref="scroll" @scroll="scroll" :probe-type="3">
             <detail-swiper :topImages="topImages"></detail-swiper>
             <detail-base-info :goods="goods"></detail-base-info>
@@ -123,11 +120,11 @@ import {getDetailDate,getRecommend, goods, shopInfo, goodsParam} from 'network/d
           product.image=this.topImages[0];
           product.title=this.goods.title;
           product.desc=this.goods.desc;
-          product.price=this.realPrice;
+          product.price=this.goods.realPrice;
           product.iid=this.iid
           //把数据提交到vuex里
-          this.$store.commit('addCart',product)
-          console.log(this.$store.state.cartList)
+          this.$store.dispatch('addCart',product)
+        //   console.log(this.$store.state.cartList)
       }
   },
   //点击导航栏跳转到对应主题
