@@ -1,40 +1,64 @@
 <template>
-    <div>
-        <nav-bar class="nav-bar">
-            <div slot="center">购物车({{cartLength}})</div>
-        </nav-bar>
-        <shop-cart-list/>
-        <cart-button-bar/>
-    </div>
-</template>
- 
-<script>
-import NavBar from 'components/common/navbar/NavBar'
+  <div id="shopcart">
+    <nav-bar class="nav-bar">
+      <div slot="center">购物车({{cartCount}})</div>
+    </nav-bar>
 
-import ShopCartList from './childComps/ShopCartList'
-import CartButtonBar from './childComps/CartButtonBar'
-//将getters映射在computed内
+    <cart-list/>
+
+    <cart-bottom-bar/>
+
+  </div>
+</template>
+
+<script>
+import NavBar from 'components/common/navbar/NavBar';
+import CartList from './childComps/CartList';
+import CartBottomBar from './childComps/CartBottomBar';
+
 import { mapGetters } from 'vuex';
 
+
 export default {
-name:'Shopcart',
-components:{
+  name: 'Shopcart',
+  data() { 
+    return {
+
+    }
+  },
+  components:{
     NavBar,
-    ShopCartList,
-    CartButtonBar
-},
-//购物车商品数量(不含重复)
-computed: {
-    ...mapGetters(['cartLength'])
-},
-}
+    CartList,
+    CartBottomBar
+  },
+  computed:{
+    //mapGetters的第一种用法
+    ...mapGetters(['cartCount']),
+    //第二种用法
+    // ...mapGetters({
+    //   length: 'cartLength',
+    //   list: 'cartList'
+    // })
+  }
+ }
 </script>
 
-<style scoped>
-.nav-bar{
-    background-color:var(--color-tint);
-    color: #ffffff;
-    position: relative;
-    z-index: 9;
-}
+<style  scoped>
+  #shopcart {
+    /*position: relative;*/
+    height: 100vh;
+  }
+
+  .nav-bar {
+    background-color: var(--color-tint);
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .cart-list {
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    width: 100%;
+  }
 </style>

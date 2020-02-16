@@ -36,13 +36,23 @@ const routes = [
     },
     {
         path:'/detail/:iid',
-        component:Detail
+        component: Detail
     }
 ]
 
 const router = new VueRouter({
-  routes,
-  mode:'history'
+  mode: 'hash',
+  base: process.env.BASE_URL,
+  routes
 })
+
+router.onError((error) => {
+    const pattern = /Loading chunk (\d)+ failed/g;
+    const isChunkLoadFailed = error.message.match(pattern);
+    const targetPath = router.history.pending.fullPath;
+    if (isChunkLoadFailed) {
+    router.replace(targetPath);
+    }
+});
 
 export default router

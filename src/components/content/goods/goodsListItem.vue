@@ -1,49 +1,59 @@
 <template>
-    <div class="goods" @click="itemClick">
-        <img :src="showGoods" alt="" @load='imgLoad'>
-        <div class="goods-info">
-            <p>{{goodsItem.title}}</p>
-            <span  class="price">￥{{goodsItem.price}}</span>
-            <span class="collect">{{goodsItem.cfav}}</span>
-        </div>
+  <div class="goods-item" @click="itemClick">
+    <img v-lazy="showImage" alt="" @load="imgLoad">
+    <div class="goods-info" >
+      <p>{{product.title}}</p>
+      <span class="price">{{product.price}}</span>
+      <span class="collect">{{product.cfav}}</span>
     </div>
+  </div>
 </template>
- 
+
 <script>
   export default {
-  name:'',
-  props:{
-      goodsItem:{
-          type:Object,
-          default(){
-              return {}
-          }
+    name: "GoodsListItem",
+    props: {
+      product: {
+        type: Object,
+        default() {
+          return {}
+        }
       }
-  },
-  computed: {
-    showGoods(){
-      return  this.goodsItem.image || this.goodsItem.show.img
-    }
-  },
-  methods: {
-    imgLoad(){
-      this.$bus.$emit('itemImgLoad')
     },
-     //跳转到详情页
-    itemClick(){
-      this.$router.push('/detail/'+ this.goodsItem.iid)
+    created(){
+      //console.log(this.product)
+    },
+    computed:{
+      showImage(){
+        return this.product.img || this.product.image || this.product.show.img;
+      }
+    },
+    methods:{
+      imgLoad(){
+        this.$bus.$emit('itemImageLoad');
+
+        // if(this.$route.path.indexOf('/home')){
+        //   this.$bus.$emit('homeItemImageLoad');
+        // } else if(this.$route.path.indexOf('/detail')){
+        //   this.$bus.$emit('detailItemImageLoad');
+        // }
+      },
+      itemClick(){
+        this.$router.push('/detail/' + this.product.iid);
+      }
     }
-  },
-}
+  }
 </script>
 
 <style scoped>
-  .goods {
+  .goods-item {
     padding-bottom: 40px;
     position: relative;
-    width: 47%;
+
+    width: 46%;
   }
-  .goods img {
+
+  .goods-item img {
     width: 100%;
     border-radius: 5px;
   }

@@ -13,7 +13,7 @@
     </div>
     <div class="info-service">
       <span class="info-service-item" v-for="index in goods.services.length-1" :key="index">
-        <img :src="goods.services[index-1].icon">
+        <img :src="goods.services[index-1].icon|Imgfilter">
         <span>{{goods.services[index-1].name}}</span>
       </span>
     </div>
@@ -21,15 +21,32 @@
 </template>
 
 <script>
-	export default {
-		name: "DetailBaseInfo",
-    props: {
-		  goods: {
-		    type: Object
+export default {
+  name: 'DetailBaseInfo',
+  props:{
+      goods: {
+          type: Object,
+          default(){
+              return {}
+          }
       }
+  },
+  filters:{
+      Imgfilter: function(value){
+          return "http:" + value
+      }
+  },
+  data() { 
+    return {
+
     }
-	}
+  },
+  created(){
+      //console.log(this.goods);
+  }
+ }
 </script>
+
 
 <style scoped>
   .base-info {
@@ -68,7 +85,7 @@
 
     /*让元素上浮一些: 使用相对定位即可*/
     position: relative;
-    top: -4px;
+    top: -8px;
   }
 
   .info-other {

@@ -19,7 +19,7 @@
           <span>{{commentInfo.style}}</span>
         </div>
         <div class="info-imgs">
-          <img :src="item" v-for="(item, index) in commentInfo.images">
+          <img :src="item" v-for="(item, index) in commentInfo.images" :key="index">
         </div>
       </div>
     </div>
@@ -27,22 +27,30 @@
 </template>
 
 <script>
-  import {formatDate} from "@/common/utils";
+import {formatDate} from 'common/utils';
 
-  export default {
-		name: "DetailCommentInfo",
-    props: {
-		  commentInfo: {
-		    type: Object,
+export default {
+  name: 'DetailCommentInfo',
+  props:{
+      commentInfo:{
+          type: Object,
+          default(){
+              return {};
+          }
       }
-    },
+  },
+  data() { 
+    return {
+
+    }
+  },
     filters: {
 		  showDate: function (value) {
         let date = new Date(value*1000);
         return formatDate(date, 'yyyy-MM-dd')
       }
     }
-	}
+ }
 </script>
 
 <style scoped>

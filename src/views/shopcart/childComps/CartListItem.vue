@@ -1,10 +1,13 @@
 <template>
   <div id="shop-item">
+    <!-- <div class="item-selector">
+      <CheckButton @checkBtnClick="checkedChange" v-model="itemInfo.checked"></CheckButton>
+    </div>  -->
     <div class="item-selector">
-      <check-button :isActive="itemInfo.isActive" @click.native="goodsCheckd"/>
+      <check-button :is-checked="itemInfo.checked" @click.native="checkedChange"></check-button>
     </div>
     <div class="item-img">
-      <img :src="itemInfo.image" alt="商品图片">
+      <img :src="showImage" alt="商品图片">
     </div>
     <div class="item-info">
       <div class="item-title">{{itemInfo.title}}</div>
@@ -14,28 +17,32 @@
         <div class="item-count right">x{{itemInfo.count}}</div>
       </div>
     </div>
+    <!-- <div><h2>{{itemInfo}}</h2></div> -->
   </div>
 </template>
- 
+
 <script>
-import CheckButton from 'components/content/checkButton/CheckButton'
+  import CheckButton from 'components/content/checkButton/CheckButton';
+
   export default {
-  name:'',
-  components: {
-      CheckButton
-  },
-  props:{
-      itemInfo:{
-          type:Object,
-          default(){
-              return {}
-          }
+    name: "ShopCartItem",
+    props: {
+      itemInfo: Object,
+      default(){
+        return {}
       }
-  },
-  methods: {
-      //是否选中购物车商品
-      goodsCheckd(){
-          this.itemInfo.isActive=!this.itemInfo.isActive
+    },
+    components: {
+      CheckButton
+    },
+    methods: {
+      checkedChange() {
+        this.itemInfo.checked = !this.itemInfo.checked;
+      }
+    },
+    computed:{
+      showImage(){
+          return "http:" + this.itemInfo.image;
       }
   },
   }
@@ -66,7 +73,7 @@ import CheckButton from 'components/content/checkButton/CheckButton'
   .item-img {
     padding: 5px;
     /*border: 1px solid #ccc;*/
-  }
+   }
 
   .item-img img {
     width: 80px;
@@ -99,5 +106,5 @@ import CheckButton from 'components/content/checkButton/CheckButton'
 
   .info-bottom .item-price {
     color: orangered;
-  }
+  } 
 </style>

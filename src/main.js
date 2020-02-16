@@ -3,10 +3,25 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+import FastClick from 'fastclick'
+import VueLazyLoad from 'vue-lazyload'
+
+import toast from 'components/common/toast'
+
 Vue.config.productionTip = false
 
-//把事件总线的原型给他赋值一个vue实例，到时候调用事件总线就去vue源码里面调用相关方法
-Vue.prototype.$bus=new Vue()
+//解决移动端300ms延迟
+FastClick.attach(document.body)
+
+//安装toast插件
+Vue.use(toast)
+
+//安装懒加载插件
+Vue.use(VueLazyLoad, {
+  loading: require('./assets/img/common/placeholder.png')
+})
+
+Vue.prototype.$bus = new Vue()
 
 new Vue({
   router,

@@ -1,8 +1,8 @@
 <template>
   <swiper ref="swiper" v-if="banners.length">
-    <swiper-item v-for="(item, index) in banners" :key="index">
+    <swiper-item v-for="(item, index) in banners" :key="index" >
       <a :href="item.link">
-        <img :src="item.image" alt="" @load="imgLoad">
+        <img :src="item.image" alt="" @load="imageLoad">
       </a>
     </swiper-item>
   </swiper>
@@ -11,40 +11,35 @@
 <script>
   import {Swiper, SwiperItem} from 'components/common/swiper'
 
-	export default {
-		name: "HomeSwiper",
-    components: {
-		  Swiper,
-      SwiperItem
-    },
+  export default {
+    name: "HomeSwiper",
     props: {
-		  banners: {
-		    type: Array,
-        default: []
+      banners: {
+        type: Array,
+        default() {
+          return []
+        }
       }
     },
     data(){
-      return {
-        isTrue:false
+      return{
+        isLoad: false,
       }
     },
-    methods: {
-		  stopTimer() {
-		    this.$refs.swiper.stopTimer()
-      },
-      startTimer() {
-		    if (this.$refs.swiper) {
-          this.$refs.swiper.startTimer()
-        }
-      },
-      imgLoad(){
-        if(!this.isTrue){
-        this.$emit('swiperImgLoad')
-        this.isTrue=true
+    components: {
+      Swiper,
+      SwiperItem
+    },
+    methods:{
+      imageLoad(){
+        if(!this.isLoad){
+          this.$emit('swiperImageLoad')
+          this.isLoad = true
+          
         }
       }
     }
-	}
+  }
 </script>
 
 <style scoped>

@@ -37,40 +37,41 @@ export default {
   },
   data() { 
     return {
-        // counter: 0,
-        // imagesLength: 0,
+        counter: 0,
+        imagesLength: 0,
         MyTopImages: [],
     }
   },
-  methods:{
-      imgLoad(){
-        //用户和性能二选一
-          // if(++this.counter === this.imagesLength){
-              this.$emit('imageLoad');
-          // }
-      }
-  },
-  //watch监听事件是否发生改变
+  //防止详情页内图片加载不完全而导致的better-scroll插件滚动中断
+  // methods:{
+  //     imgLoad(){
+  //         if(++this.counter === this.imagesLength){
+  //             this.$emit('imageLoad');
+  //         }
+  //     }
+  // },
   // watch:{
   //     detailInfo(){
   //         this.imagesLength = this.detailInfo.detailImage[0].list.length;
   //     }
-  // },
+  // }
+
   methods:{
     imgLoad(){
+      //console.log('加载DetailGoodsInfo');
       this.$emit('detailImageLoad');
     }
   } ,
-   created() {
-     if(Object.keys(this.detailInfo).length !== 0){
-      this.MyTopImages = this.detailInfo.detailImage[0].list;
-      for(let i = 0; i < this.MyTopImages.length; i++){
-          this.MyTopImages[i] = "http:" + this.MyTopImages[i];
-      }
-     }
+  //  created() {
+  //    if(Object.keys(this.detailInfo).length !== 0){
+  //     this.MyTopImages = this.detailInfo.detailImage[0].list;
+  //     for(let i = 0; i < this.MyTopImages.length; i++){
+  //         this.MyTopImages[i] = "http:" + this.MyTopImages[i];
+  //     }
+  //    }
 
-      console.log(this.MyTopImages);
-  }
+  //     console.log(this.MyTopImages);
+  // }
  }
 </script>
 
